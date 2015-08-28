@@ -25,7 +25,7 @@ class PubSub(object):
         return _.sessions.pop( sid ), _.channels.pop( sid )
     def sub(_,sid,chs):
         "subscribe session id (sid) to a new list of channels (chs)"
-        return _.chs.setdefault( sid, chs )
+        return _.channels[sid].append( chs )
     def pub(_,sid,channel,msg,skip_self=True):
         """
         publish from session id (sid) msg across channel

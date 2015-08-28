@@ -20,8 +20,9 @@ def mk_send(sock):
                                    else json.dumps( msg ) ) )
 
 @bottle.route('/')
+def _(): return bottle.redirect('/static/index.html')
 @bottle.route('/static/<path:path>')
-def _(path='index.html'): return bottle.static_file(path)
+def _(path='index.html'): return bottle.static_file(path,'html')
 
 @bottle.route('/ws')
 def handle_websocket():
