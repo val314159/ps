@@ -1,8 +1,6 @@
+#!/usr/bin/env python
 """
 A simple pubsub websocket server
-
-because the needs of the many outweigh the needs of the few
-
 """
 from gevent.pywsgi import WSGIServer
 from geventwebsocket import WebSocketError
@@ -32,14 +30,13 @@ def handle_websocket():
         raise bottle.abort(400, 'Expected WebSocket request.')
     sid = str( id(wsock) )
     app.pubsub.add( sid, mk_send(wsock) )
+    app.pubsub.snd( sid, sid, [0,'HELLO',sid] )
     try:
         while True:
             message = wsock.receive()
             if not message: break
-            print "MSG", repr(message)
             jmsg = json.loads( message )
             cmd  = jmsg[1]
-            print "CMD", cmd
             if   cmd=='PUB' :  app.pubsub.pub ( sid, jmsg[2], message )
             elif cmd=='PUB+':  app.pubsub.pub ( sid, jmsg[2], message, 0 )
             elif cmd=='SUB' :  app.pubsub.sub ( sid, jmsg[2] )
@@ -51,5 +48,5 @@ def handle_websocket():
 
 if __name__=='__main__':
     ENV=os.environ.get
-    WSGIServer((ENV('HOST','0'), int(ENV('PORT',8080))), app,
+    WSGIServer((ENV('HOST','0'), int(ENV('PORT',8001))), app,
                handler_class=WebSocketHandler).serve_forever()

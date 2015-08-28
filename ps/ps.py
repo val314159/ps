@@ -1,9 +1,5 @@
-#!/usr/bin/env python
 """
 A simple pubsub implementation
-
-because the needs of the many outweigh the needs of the few.
-
 """
 class PubSub(object):
     """
@@ -33,6 +29,8 @@ class PubSub(object):
         """
         for k,fun in _.sessions.iteritems():
             if skip_self  and  k==sid: continue
-            print "X", repr((k, _.channels[k]))
             if channel in _.channels[k]:
                 fun( sid, channel, msg )
+
+    def snd(_,sid,channel,msg):
+        _.sessions[sid]( sid, channel, msg )
