@@ -1,6 +1,10 @@
-<body onload=startApp()>
-<hr>
-<input id="chatInput" onchange="doChat(this)">
-<hr>
-<script src="chat.js">
+<!doctype html>
+<body onload=App.start()>
+  <hr>
+  <input id="chatInput" onchange="App.chat(this)">
+  <hr>
+  <script src="chat.js"></script>
+  <script>App=new Application({
+    host:'localhost:8000'
+    })</script>
 </body>

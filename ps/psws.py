@@ -14,13 +14,14 @@ app.pubsub = ps.PubSub()
 
 def mk_send(sock):
     """
-    whee
+    returns a send function bound to the socket
     """
-    return lambda msg:( sock.send( msg if type(msg)==type('')
-                                   else json.dumps( msg ) ) )
+    return lambda sid,ch,msg:( sock.send( msg if type(msg)==type('')
+                                          else json.dumps( msg ) ) )
 
 @bottle.route('/')
 def _(): return bottle.redirect('/static/index.html')
+
 @bottle.route('/static/<path:path>')
 def _(path='index.html'): return bottle.static_file(path,'html')
 
@@ -34,16 +35,20 @@ def handle_websocket():
     try:
         while True:
             message = wsock.receive()
+            if not message: break
+            print "MSG", repr(message)
             jmsg = json.loads( message )
-            cmd = jmsg[1]
+            cmd  = jmsg[1]
+            print "CMD", cmd
             if   cmd=='PUB' :  app.pubsub.pub ( sid, jmsg[2], message )
-            elif cmd=='PUB+':  app.pubsub.pubp( sid, jmsg[2], message, 0 )
+            elif cmd=='PUB+':  app.pubsub.pub ( sid, jmsg[2], message, 0 )
             elif cmd=='SUB' :  app.pubsub.sub ( sid, jmsg[2] )
             else:              raise RuntimeError('Bad Command')
     finally:
         app.pubsub.pop( sid )
         pass
     pass
+
 if __name__=='__main__':
     ENV=os.environ.get
     WSGIServer((ENV('HOST','0'), int(ENV('PORT',8080))), app,

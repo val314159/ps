@@ -25,7 +25,7 @@ class PubSub(object):
         return _.sessions.pop( sid ), _.channels.pop( sid )
     def sub(_,sid,chs):
         "subscribe session id (sid) to a new list of channels (chs)"
-        return _.channels[sid].append( chs )
+        return _.channels[sid].extend( chs )
     def pub(_,sid,channel,msg,skip_self=True):
         """
         publish from session id (sid) msg across channel
@@ -33,5 +33,6 @@ class PubSub(object):
         """
         for k,fun in _.sessions.iteritems():
             if skip_self  and  k==sid: continue
+            print "X", repr((k, _.channels[k]))
             if channel in _.channels[k]:
                 fun( sid, channel, msg )
