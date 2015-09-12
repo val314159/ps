@@ -30,17 +30,17 @@ def handle_websocket():
         raise bottle.abort(400, 'Expected WebSocket request.')
     sid = str( id(wsock) )
     app.pubsub.add( sid, mk_send(wsock) )
-    app.pubsub.snd( sid, sid, [0,'HELLO',sid] )
+    app.pubsub.snd( sid, [0,':HELLO:',{"sessionId":sid}] )
     try:
         while True:
+            print sid, "BEFORE RECV"
             message = wsock.receive()
+            print sid, "AFTER RECV", repr(message)
             if not message: break
             jmsg = json.loads( message )
-            cmd  = jmsg[1]
-            if   cmd=='PUB' :  app.pubsub.pub ( sid, jmsg[2], message )
-            elif cmd=='PUB+':  app.pubsub.pub ( sid, jmsg[2], message, 0 )
-            elif cmd=='SUB' :  app.pubsub.sub ( sid, jmsg[2] )
-            else:              raise RuntimeError('Bad Command')
+            if   jmsg[0] == 0: app.pubsub.sub( sid, jmsg[2]['channels'] )
+            elif jmsg[0] == 1: app.pubsub.pub( sid, jmsg[1], [2, sid, jmsg] )
+            else:  raise RuntimeError('Bad Command')
     finally:
         app.pubsub.pop( sid )
         pass

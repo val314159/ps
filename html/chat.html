@@ -6,5 +6,16 @@
   <script src="chat.js"></script>
   <script>App=new Application({
     host:'localhost:8001'
-    })</script>
+  });
+  App.onhello = function() {
+      console.log("YON HELLO", this.sid);
+      this.sub(["$chat","SYS"]);
+      this.pub("SYS","NEW ARRIVAL " + this.sid);
+  };
+  App.chat = function(inputCtl) {
+      console.log(inputCtl.value);
+      this.pub("$chat",inputCtl.value);
+      inputCtl.value = "";
+  };
+  </script>
 </body>
