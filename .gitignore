@@ -2,6 +2,13 @@
 __pycache__/
 *.py[cod]
 
+# virtualenvs
+.ve
+ve
+venv
+.venv
+.v
+
 # C extensions
 *.so
 
@@ -57,5 +64,6 @@ docs/_build/
 target/
 
 # emacs backup files
+*~
 \#*
 .\#*
