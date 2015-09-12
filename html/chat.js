@@ -28,8 +28,8 @@ Application.prototype.appendJSON = function(msg) {
   var elt = document.createTextNode( JSON.stringify( msg ) );
   document.getElementsByTagName( 'body' )[0].appendChild( elt );
 }
-Application.prototype.pub = function(ch,msg) {
-    this.ws.send(JSON.stringify([1, ch, msg]));
+Application.prototype.pub = function(ch,msg,rid) {
+    this.ws.send(JSON.stringify([1, ch, rid||"", msg]));
 };
 Application.prototype.sub = function(channels) {
     this.ws.send(JSON.stringify([0,':SUB:',{"channels":channels}]));
