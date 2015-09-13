@@ -14,23 +14,22 @@ class PubSub(object):
         pass
     def add(_,sid,fun):
         "add a session (session id,function pair) to the internal tables"
-        _.sessions[sid], _.channels[sid] = fun, [sid]
+        _.sessions[sid], _.channels[sid] = fun, ["*",sid]
         pass
     def pop(_,sid):
         "pop off a session from the internal tables"
         return _.sessions.pop( sid ), _.channels.pop( sid )
     def sub(_,sid,chs):
         "subscribe session id (sid) to a new list of channels (chs)"
-        return _.channels[sid].extend( chs )
-    def pub(_,sid,channel,msg,skip_self=True):
-        """
-        publish from session id (sid) msg across channel
-        skip_self can be set to False to reflect your messages back at you
-        """
+        print "-PRE-SUB", _.channels[sid]
+        _.channels[sid].extend( chs )
+        print "POST-SUB", _.channels[sid]
+        return
+    def pub(_,sid,channel,msg):
+        "publish from session id (sid) msg across channel"
         for k,fun in _.sessions.iteritems():
-            if skip_self  and  k==sid: continue
-            if channel in _.channels[k]:
+            if k != sid  and  channel in _.channels[k]:
                 fun( sid, channel, msg )
 
-    def snd(_,sid,channel,msg):
-        _.sessions[sid]( sid, channel, msg )
+    def snd(_,sid,msg):
+        _.sessions[sid]( sid, sid, msg )
