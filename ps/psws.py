@@ -10,13 +10,6 @@ import os, sys, traceback as tb, bottle, json, ps
 app = bottle.default_app()
 app.pubsub = ps.PubSub()
 
-def mk_send(sock):
-    """
-    returns a send function bound to the socket
-    """
-    return lambda sid,ch,msg:( sock.send( msg if type(msg)==type('')
-                                          else json.dumps( msg ) ) )
-
 @bottle.route('/')
 def _(): return bottle.redirect('/static/index.html')
 
@@ -28,12 +21,13 @@ def handle_websocket():
     wsock = bottle.request.environ.get('wsgi.websocket')
     if not wsock:
         raise bottle.abort(400, 'Expected WebSocket request.')
+    def wsend(sid,ch,msg): wsock.send( json.dumps( msg ) )
     sid = str( id(wsock) )
-    app.pubsub.add( sid, mk_send(wsock) )
-    app.pubsub.snd( sid, [0,':HELLO:',{"sessionId":sid}] )
+    app.pubsub.add( sid, wsend )
+    print sid, "HELLO"
+    wsend( sid, sid, [0,':HELLO:',{"sessionId":sid}] )
     try:
         while True:
-            print sid, "BEFORE RECV"
             message = wsock.receive()
             print sid, "AFTER RECV", repr(message)
             if not message: break
@@ -42,11 +36,12 @@ def handle_websocket():
             elif jmsg[0] == 1: app.pubsub.pub( sid, jmsg[1], [2, sid, jmsg] )
             else:  raise RuntimeError('Bad Command')
     finally:
+        print sid, "BYBY"
         app.pubsub.pop( sid )
         pass
     pass
 
 if __name__=='__main__':
     ENV=os.environ.get
-    WSGIServer((ENV('HOST','0'), int(ENV('PORT',8001))), app,
+    WSGIServer((ENV('HOST','0'), int(ENV('PORT',8002))), app,
                handler_class=WebSocketHandler).serve_forever()
