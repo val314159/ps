@@ -32,7 +32,7 @@ class PubSubClient(object):
         _.subscribe(["xx","yz"])
         for i in range(3):
             time.sleep(1)
-            _.sendj("Hello %d" % i)
+            _.sendj([1,"xx",0,"Hello %d" % i])
             pass
         pass
     pass
