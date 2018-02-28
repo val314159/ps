@@ -3,18 +3,14 @@ from gevent import monkey;monkey.patch_all()
 from gevent.pywsgi import WSGIServer as WSGI
 from geventwebsocket import WebSocketError
 from geventwebsocket.handler import WebSocketHandler as WSH
-from bottle import request, Bottle, abort, static_file
-import os, sys, time, json, traceback as tb
+import json, bottle
 
 class PubSubConn(object):
     Connections = []
     def __init__(_):
         _.ws = request.environ.get('wsgi.websocket')
-        if not _.ws:  abort(400, 'Expected WebSocket request.')
-        _.subs = []
-        _.Connections.append( _ )
-        print(">> NewWS: " + repr(_.ws))
-        print(">> Cxns: " + repr(_.Connections))
+        if not _.ws: bottle.abort(400, 'Expected WebSocket request.')
+        _.subs = [] ; _.Connections.append( _ )
         pass
     def sendj(_, x): _.ws.send(json.dumps(x))
     def subscribe(_, channel_names): _.subs.extend( channel_names )
@@ -39,19 +35,15 @@ class PubSubConn(object):
     def recvj(_, obj):
         print("[OBJ:%s]"%obj)
         if   obj[0] == 0:
-            print("ZERO (sub)", obj[2])
             _.subscribe(obj[2])
         elif obj[0] == 1:
-            print("ONE1 (pub)", obj[1:])
             try:
                 _.publish(obj[1], obj)
             except:
                 print("ERR")
         elif obj[0] == 2:
-            print("TWO (req)")
             _.sendfd(obj[1], obj)
         elif obj[0] == 3:
-            print("THREE (rep)")
             _.sendfd(obj[1], obj)
         else:
             assert False
@@ -72,12 +64,16 @@ class PubSubConn(object):
             pass
         pass
     pass
+###
+###
+import sys, traceback as tb, bottle
 
-app = Bottle()
+app = bottle.Bottle()
 
 @app.route('/static/')
 @app.route('/static/<path>')
-def handle_static(path='index.html'): return static_file(path, root='static')
+def handle_static(path='index.html'):
+    return bottle.static_file(path, root='static')
 
 @app.route('/v1/ps')
 def handle_pubsub(): return PubSubConn().run_forever()
