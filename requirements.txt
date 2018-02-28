@@ -1,1 +1,6 @@
-pubsub/requirements.txt
+bottle
+gevent-websocket
+websocket-client
+
+# optional
+numpy
